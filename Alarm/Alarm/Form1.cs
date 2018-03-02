@@ -25,6 +25,9 @@ namespace Alarm
         public Boolean Enable_Switch;
         public string AudioPath;
         public int AudioSecond;
+        public int Stopwatch;
+        public int Stopwatch_Second;
+        public string[] Time = { "00", "00", "00" ,"00"};
         private Properties.Settings MySetting = new Properties.Settings();
         public Form1()
         {
@@ -127,34 +130,52 @@ namespace Alarm
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (!Enable_Switch)
+            if(radioButton3.Checked)
             {
-                if (Convert.ToInt16(textBox1.Text) >= 0 && Convert.ToInt16(textBox1.Text) < 60)
+                #region mode 3
+                if (!Enable_Switch)
                 {
-                    if (Convert.ToInt16(textBox2.Text) >= 0 && Convert.ToInt16(textBox2.Text) < 60)
+                    if (Convert.ToInt16(textBox1.Text) >= 0 && Convert.ToInt16(textBox1.Text) < 60)
                     {
-                        if (Convert.ToInt16(textBox3.Text) >= 0 && Convert.ToInt16(textBox3.Text) < 60)
+                        if (Convert.ToInt16(textBox2.Text) >= 0 && Convert.ToInt16(textBox2.Text) < 60)
                         {
-                            Hours = Convert.ToInt16(textBox1.Text);
-                            Minutes = Convert.ToInt16(textBox2.Text);
-                            Seconds = Convert.ToInt16(textBox3.Text);
-                            ihours = Hours;
-                            iminutes = Minutes;
-                            iseconds = Seconds;
-                            timer1.Enabled = true;
+                            if (Convert.ToInt16(textBox3.Text) >= 0 && Convert.ToInt16(textBox3.Text) < 60)
+                            {
+                                Hours = Convert.ToInt16(textBox1.Text);
+                                Minutes = Convert.ToInt16(textBox2.Text);
+                                Seconds = Convert.ToInt16(textBox3.Text);
+                                ihours = Hours;
+                                iminutes = Minutes;
+                                iseconds = Seconds;
+                                timer1.Enabled = true;
+                            }
                         }
                     }
+                    textBox1.Enabled = false;
+                    textBox2.Enabled = false;
+                    textBox3.Enabled = false;
+                    Enable_Switch = true;
+                    button1.Text = "Pause";
                 }
-                textBox1.Enabled = false;
-                textBox2.Enabled = false;
-                textBox3.Enabled = false;
-                Enable_Switch = true;
-                button1.Text = "Pause";
+                else
+                {
+                    timer1.Enabled = !timer1.Enabled;
+                    if (!timer1.Enabled)
+                    {
+                        button1.Text = "Pause";
+                    }
+                    else
+                    {
+                        button1.Text = "Start";
+                    }
+                }
+                #endregion
             }
-            else
+            else if(radioButton2.Checked)
             {
-                timer1.Enabled = !timer1.Enabled;
-                if(!timer1.Enabled)
+                #region mode 2
+                StopwatchTimer.Enabled = !StopwatchTimer.Enabled;
+                if(StopwatchTimer.Enabled)
                 {
                     button1.Text = "Pause";
                 }
@@ -162,7 +183,17 @@ namespace Alarm
                 {
                     button1.Text = "Start";
                 }
+
+                #endregion
             }
+            else if(radioButton1.Checked)
+            {
+                #region mode 1
+
+                #endregion
+            }
+
+
         }
 
         private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e)
@@ -282,23 +313,90 @@ namespace Alarm
         }
 
         #endregion
+        private void StopwatchTimer_Tick(object sender, EventArgs e)
+        {
+            Stopwatch++;
+
+            if(Stopwatch%100<10)
+            {
+                Time[3] = "0"+(Stopwatch%100).ToString();
+            }
+            else
+            {
+                Time[3] = (Stopwatch%100).ToString();
+            }
+            Stopwatch_Second = Stopwatch / 100;
+           
+            #region Second_judge
+            if (Stopwatch_Second / 3600 < 10)
+            {
+                Time[0] = "0" + (Stopwatch_Second / 3600).ToString();
+            }
+            else
+            {
+                Time[0] = (Stopwatch_Second / 3600).ToString();
+            }
+
+            if (((Stopwatch_Second % 3600) / 60) < 10)
+            {
+
+                Time[1] = "0" + ((Stopwatch_Second % 3600) / 60).ToString();
+            }
+            else
+            {
+                Time[1] = ((Stopwatch_Second % 3600) / 60).ToString(); ;
+            }
+
+            if ((Stopwatch_Second % 3600) % 60 < 10)
+            {
+                Time[2] = "0" + ((Stopwatch_Second % 3600) % 60).ToString(); ;
+            }
+            else
+            {
+                Time[2] = ((Stopwatch_Second % 3600) % 60).ToString(); ;
+            }
+            #endregion
+            stopwatchlabel.Text = Time[0] + ":" + Time[1] + ":" + Time[2] + "." + Time[3];
+        }
+
         private void button2_Click(object sender, EventArgs e)
         {
-            timer1.Enabled = false;
-            timer2.Enabled = false;
-            button1.Text = "Start";
-            Enable_Switch = false;
-            textBox1.Text = ihours.ToString();
-            textBox2.Text = iminutes.ToString();
-            textBox3.Text = iseconds.ToString();
-            textBox1.Enabled = true;
-            textBox2.Enabled = true;
-            textBox3.Enabled = true;
-            button1.Enabled = true;
-            player1.controls.stop();
-            if(AudioPath==null)
+            if (radioButton3.Checked)
             {
-                player.Stop();
+                #region mode 3
+                timer1.Enabled = false;
+                timer2.Enabled = false;
+                button1.Text = "Start";
+                Enable_Switch = false;
+                textBox1.Text = ihours.ToString();
+                textBox2.Text = iminutes.ToString();
+                textBox3.Text = iseconds.ToString();
+                textBox1.Enabled = true;
+                textBox2.Enabled = true;
+                textBox3.Enabled = true;
+                button1.Enabled = true;
+                player1.controls.stop();
+                if (AudioPath == null)
+                {
+                    player.Stop();
+                }
+                #endregion
+            }
+            else if(radioButton2.Checked)
+            {
+                button1.Text = "Start";
+                StopwatchTimer.Enabled = false;
+                stopwatchlabel.Text = "00:00:00.00";
+                for(byte i=0;i<4;i++)
+                {
+                    Time[i] = "00";
+                }
+                Stopwatch = 0;
+                Stopwatch_Second = 0;
+            }   
+            else if(radioButton1.Checked)
+            {
+
             }
         }
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
